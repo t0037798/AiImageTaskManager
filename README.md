@@ -395,10 +395,10 @@ dotnet test
 
 ### Prerequisites
 
-* .NET SDK
+* .NET 10 SDK
 * Git
 * Visual Studio 2026 or later
-* SQLite-compatible EF Core provider
+* EF Core CLI tools
 
 ### 1. Clone the repository
 
@@ -458,11 +458,11 @@ https://localhost:7074/swagger
 
 ## Future Work
 
+* Add Docker Compose deployment environment
 * Integrate Stable Diffusion WebUI API or ComfyUI API
 * Add frontend dashboard
 * Support response body validation for API test cases
 * Support multi-step API test workflows
 * Replace SQLite with PostgreSQL or SQL Server
-* Add Docker Compose deployment environment
 * Add refresh token support
 * Add role-based authorization
