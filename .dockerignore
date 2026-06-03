@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.vs/
+.git/
+.gitignore
+
+*.db
+*.db-shm
+*.db-wal
+
+docker-data/
+docker-generated-images/
+
+README.md
+docs/

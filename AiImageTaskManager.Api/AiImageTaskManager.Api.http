@@ -1,17 +1,9 @@
-@baseUrl = https://localhost:7074
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ0ZXN0MkBleGFtcGxlLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJUZXN0IFVzZXIgMiIsImV4cCI6MTc4MDQ5OTAwOSwiaXNzIjoiQWlJbWFnZVRhc2tNYW5hZ2VyIiwiYXVkIjoiQWlJbWFnZVRhc2tNYW5hZ2VyQ2xpZW50In0.dhSjgYfIdTg6LWOcUQWrDLnZFaGJIUG9aRpO3ZE9oo4
+@baseUrl=https://localhost:7074
+@dockerBaseUrl=http://localhost:8080
+@token=PASTE_LOCAL_TOKEN_HERE
+@dockerToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJkb2NrZXItdGVzdEBleGFtcGxlLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJEb2NrZXIgVGVzdCBVc2VyIiwiZXhwIjoxNzgwNTA0MTEyLCJpc3MiOiJBaUltYWdlVGFza01hbmFnZXIiLCJhdWQiOiJBaUltYWdlVGFza01hbmFnZXJDbGllbnQifQ.MEnNCgLTw4e4BJ0SWSXLCV2Adu3-tGluYyeFHE0UkS0
 
-### Register
-POST {{baseUrl}}/api/auth/register
-Content-Type: application/json
-
-{
-  "email": "test2@example.com",
-  "displayName": "Test User 2",
-  "password": "P@ssw0rd123"
-}
-
-### Login
+### Local Login
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -20,18 +12,37 @@ Content-Type: application/json
   "password": "P@ssw0rd123"
 }
 
-### Me
+### Local Me
 GET {{baseUrl}}/api/auth/me
 Authorization: Bearer {{token}}
 
-### Get image tasks
-GET {{baseUrl}}/api/image-tasks
-Authorization: Bearer {{token}}
-
-### Create image task
-POST {{baseUrl}}/api/image-tasks
+### Docker Register
+POST {{dockerBaseUrl}}/api/auth/register
 Content-Type: application/json
-Authorization: Bearer {{token}}
+
+{
+  "email": "docker-test@example.com",
+  "displayName": "Docker Test User",
+  "password": "P@ssw0rd123"
+}
+
+### Docker Login
+POST {{dockerBaseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "docker-test@example.com",
+  "password": "P@ssw0rd123"
+}
+
+### Docker Me
+GET {{dockerBaseUrl}}/api/auth/me
+Authorization: Bearer {{dockerToken}}
+
+### Docker Create image task
+POST {{dockerBaseUrl}}/api/image-tasks
+Content-Type: application/json
+Authorization: Bearer {{dockerToken}}
 
 {
   "prompt": "a realistic train running on railway tracks",
@@ -43,28 +54,6 @@ Authorization: Bearer {{token}}
   "seed": 12345
 }
 
-### Get API test cases
-GET {{baseUrl}}/api/test-cases
-Authorization: Bearer {{token}}
-
-### Create public API test case - login endpoint
-POST {{baseUrl}}/api/test-cases
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "name": "Login endpoint should return 200",
-  "method": "POST",
-  "url": "https://localhost:7074/api/auth/login",
-  "headersJson": null,
-  "bodyJson": "{\"email\":\"test2@example.com\",\"password\":\"P@ssw0rd123\"}",
-  "expectedStatusCode": 200
-}
-
-### Run API test case
-POST {{baseUrl}}/api/test-cases/7/run
-Authorization: Bearer {{token}}
-
-### Get API test case runs
-GET {{baseUrl}}/api/test-cases/7/runs
-Authorization: Bearer {{token}}
+  ### Docker Get image tasks
+GET {{dockerBaseUrl}}/api/image-tasks
+Authorization: Bearer {{dockerToken}}

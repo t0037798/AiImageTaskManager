@@ -1,0 +1,19 @@
+services:
+  ai-image-task-manager-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-image-task-manager-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Data Source=/app/data/ai_image_task_manager.db
+      Jwt__Issuer: AiImageTaskManager
+      Jwt__Audience: AiImageTaskManagerClient
+      Jwt__Key: This is a docker development secret key for AiImageTaskManager JWT authentication. Change this in production.
+      ApplyMigrations: "true"
+    volumes:
+      - ./docker-data:/app/data
+      - ./docker-generated-images:/app/wwwroot/images/generated

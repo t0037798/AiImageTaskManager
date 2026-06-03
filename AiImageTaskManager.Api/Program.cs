@@ -78,12 +78,25 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (app.Configuration["ApplyMigrations"] == "true")
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Docker"))
+{
+    app.UseHttpsRedirection();
+}
+
+
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

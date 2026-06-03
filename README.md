@@ -104,6 +104,17 @@ It supports:
 * Query test run history
 * User-based test case ownership
 
+### Docker Compose Support
+
+The project can be run with Docker Compose.
+
+Docker Compose runs the API in a container and stores persistent data in local mounted folders:
+
+```text
+docker-data
+docker-generated-images
+```
+
 ---
 
 ## Screenshots
@@ -132,6 +143,8 @@ After an image task is completed, the system stores a generated image file and r
 * xUnit
 * WebApplicationFactory
 * GitHub Actions CI
+* Docker
+* Docker Compose
 * Local file storage
 
 ---
@@ -160,11 +173,15 @@ AiImageTaskManager
 │   ├── FileStorage
 │   └── Services
 │
-└── AiImageTaskManager.IntegrationTests
-    ├── ApiTestCases
-    ├── Factories
-    ├── Helpers
-    └── ImageTasks
+├── AiImageTaskManager.IntegrationTests
+│   ├── ApiTestCases
+│   ├── Factories
+│   ├── Helpers
+│   └── ImageTasks
+│
+├── Dockerfile
+├── docker-compose.yml
+└── .dockerignore
 ```
 
 ---
@@ -325,10 +342,16 @@ Authorization: Bearer {token}
 
 JWT-protected endpoints can be tested using the included `.http` file.
 
-Recommended base URL:
+Recommended local base URL:
 
 ```http
 @baseUrl = https://localhost:7074
+```
+
+Recommended Docker base URL:
+
+```http
+@dockerBaseUrl = http://localhost:8080
 ```
 
 Example:
@@ -344,6 +367,17 @@ Authorization: Bearer {{token}}
 ### Get image tasks
 GET {{baseUrl}}/api/image-tasks
 Authorization: Bearer {{token}}
+```
+
+Docker example:
+
+```http
+@dockerBaseUrl = http://localhost:8080
+@dockerToken = PASTE_DOCKER_JWT_TOKEN_HERE
+
+### Docker current user
+GET {{dockerBaseUrl}}/api/auth/me
+Authorization: Bearer {{dockerToken}}
 ```
 
 > Note: Swagger UI may not consistently attach the Authorization header in the current .NET 10 / Swashbuckle setup. The `.http` file is recommended for testing JWT-protected endpoints.
@@ -399,6 +433,7 @@ dotnet test
 * Git
 * Visual Studio 2026 or later
 * EF Core CLI tools
+* Docker Desktop
 
 ### 1. Clone the repository
 
@@ -419,7 +454,7 @@ dotnet restore AiImageTaskManager.slnx
 dotnet ef database update --project AiImageTaskManager.Infrastructure --startup-project AiImageTaskManager.Api
 ```
 
-### 4. Run the API
+### 4. Run the API locally
 
 ```bash
 dotnet run --project AiImageTaskManager.Api
@@ -429,6 +464,48 @@ After the API starts, open Swagger:
 
 ```text
 https://localhost:7074/swagger
+```
+
+---
+
+## Run with Docker Compose
+
+The API can also be started with Docker Compose.
+
+```bash
+docker compose up --build
+```
+
+After the container starts, open Swagger:
+
+```text
+http://localhost:8080/swagger
+```
+
+Docker Compose uses mounted folders to persist SQLite data and generated images:
+
+```text
+docker-data
+docker-generated-images
+```
+
+To stop the container:
+
+```bash
+docker compose down
+```
+
+To remove local Docker data:
+
+```bash
+rm -rf docker-data docker-generated-images
+```
+
+On Windows PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force .\docker-data
+Remove-Item -Recurse -Force .\docker-generated-images
 ```
 
 ---
@@ -443,6 +520,7 @@ https://localhost:7074/swagger
 * API test case management and execution history
 * xUnit integration tests with isolated test database
 * GitHub Actions CI for automated build and test
+* Docker Compose support for containerized execution
 
 ---
 
@@ -458,7 +536,6 @@ https://localhost:7074/swagger
 
 ## Future Work
 
-* Add Docker Compose deployment environment
 * Integrate Stable Diffusion WebUI API or ComfyUI API
 * Add frontend dashboard
 * Support response body validation for API test cases
