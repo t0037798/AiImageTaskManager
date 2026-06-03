@@ -255,3 +255,15 @@ https://localhost:7074/swagger
 * 支援多步驟 API 測試流程
 * 將 SQLite 改為 PostgreSQL 或 SQL Server
 * 加入 Docker Compose 部署環境
+
+## Screenshots
+
+### Swagger API Overview
+
+![Swagger Overview](docs/images/swagger-overview.png)
+
+### Generated Image Result
+
+After an image task is completed, the system stores a generated image file and returns its file path through the API.
+
+![Generated Images Response](docs/images/generated-images-response.png)
