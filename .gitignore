@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# Generated images
+**/wwwroot/images/generated/*
+!**/wwwroot/images/generated/.gitkeep
+
+# Logs
+*.log

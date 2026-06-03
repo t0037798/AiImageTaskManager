@@ -1,0 +1,16 @@
+<Solution>
+  <Project Path="AiImageTaskManager.Api/AiImageTaskManager.Api.csproj">
+    <BuildDependency Project="AiImageTaskManager.Application/AiImageTaskManager.Application.csproj" />
+    <BuildDependency Project="AiImageTaskManager.Domain/AiImageTaskManager.Domain.csproj" />
+    <BuildDependency Project="AiImageTaskManager.Infrastructure/AiImageTaskManager.Infrastructure.csproj" />
+  </Project>
+  <Project Path="AiImageTaskManager.Application/AiImageTaskManager.Application.csproj">
+    <BuildDependency Project="AiImageTaskManager.Domain/AiImageTaskManager.Domain.csproj" />
+  </Project>
+  <Project Path="AiImageTaskManager.Domain/AiImageTaskManager.Domain.csproj" />
+  <Project Path="AiImageTaskManager.Infrastructure/AiImageTaskManager.Infrastructure.csproj">
+    <BuildDependency Project="AiImageTaskManager.Application/AiImageTaskManager.Application.csproj" />
+    <BuildDependency Project="AiImageTaskManager.Domain/AiImageTaskManager.Domain.csproj" />
+  </Project>
+  <Project Path="AiImageTaskManager.IntegrationTests/AiImageTaskManager.IntegrationTests.csproj" Id="4ee7f357-909f-474d-bc23-c4d046248a99" />
+</Solution>
