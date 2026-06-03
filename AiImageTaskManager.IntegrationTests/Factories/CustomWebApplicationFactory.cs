@@ -11,6 +11,9 @@ namespace AiImageTaskManager.IntegrationTests.Factories;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _databaseName =
+        $"AiImageTaskManagerTestDb-{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -34,7 +37,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseInMemoryDatabase($"AiImageTaskManagerTestDb-{Guid.NewGuid()}");
+                options.UseInMemoryDatabase(_databaseName);
             });
         });
     }

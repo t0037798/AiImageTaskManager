@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using AiImageTaskManager.IntegrationTests.Factories;
 using AiImageTaskManager.IntegrationTests.Helpers;
+using AiImageTaskManager.Application.DTOs;
 
 namespace AiImageTaskManager.IntegrationTests.ImageTasks;
 
@@ -68,17 +69,18 @@ public class ImageTasksApiTests : IClassFixture<CustomWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var createdTask = await createResponse.Content.ReadFromJsonAsync<ImageTaskResponseForTest>();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<ImageTaskResponse>();
 
         Assert.NotNull(createdTask);
+        Assert.True(createdTask!.Id > 0);
 
-        var getResponse = await _client.GetAsync($"/api/image-tasks/{createdTask!.Id}");
+        var getResponse = await _client.GetAsync($"/api/image-tasks/{createdTask.Id}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
 
-    private class ImageTaskResponseForTest
+   /* private class ImageTaskResponseForTest
     {
         public int Id { get; set; }
-    }
+    }*/
 }

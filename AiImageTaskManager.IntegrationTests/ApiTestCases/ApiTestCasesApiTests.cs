@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using AiImageTaskManager.IntegrationTests.Factories;
 using AiImageTaskManager.IntegrationTests.Helpers;
+using AiImageTaskManager.Application.DTOs;
 
 namespace AiImageTaskManager.IntegrationTests.ApiTestCases;
 
@@ -66,17 +67,18 @@ public class ApiTestCasesApiTests : IClassFixture<CustomWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-        var createdTestCase = await createResponse.Content.ReadFromJsonAsync<ApiTestCaseResponseForTest>();
+        var createdTestCase = await createResponse.Content.ReadFromJsonAsync<ApiTestCaseResponse>();
 
         Assert.NotNull(createdTestCase);
+        Assert.True(createdTestCase!.Id > 0);
 
-        var getResponse = await _client.GetAsync($"/api/test-cases/{createdTestCase!.Id}");
+        var getResponse = await _client.GetAsync($"/api/test-cases/{createdTestCase.Id}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
 
-    private class ApiTestCaseResponseForTest
+    /*private class ApiTestCaseResponseForTest
     {
         public int Id { get; set; }
-    }
+    }*/
 }
