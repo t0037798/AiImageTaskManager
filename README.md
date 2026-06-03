@@ -4,7 +4,7 @@
 
 AI image generation task management and API test automation backend system built with ASP.NET Core Web API.
 
-This project simulates an AI image generation workflow. Users can create image generation tasks, track task status, process tasks asynchronously through a background service, store generated image records, and manage API test cases with execution history.
+This project simulates an AI image generation workflow. Users can register, log in, create image generation tasks, track task status, process tasks asynchronously through a background service, store generated image records, and manage API test cases with execution history.
 
 > Current version uses a mock PNG output to simulate image generation. Stable Diffusion WebUI / ComfyUI integration is planned as a future enhancement.
 
@@ -12,13 +12,37 @@ This project simulates an AI image generation workflow. Users can create image g
 
 ## Features
 
+### JWT Authentication
+
+* User registration
+* User login
+* JWT token generation
+* Protected API endpoints
+* Current user profile endpoint
+* User-based data isolation
+
+Authentication endpoints:
+
+```http
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+After login, protected endpoints require a JWT bearer token:
+
+```http
+Authorization: Bearer {token}
+```
+
 ### Image Task Management
 
 * Create image generation tasks
-* Query all image tasks
-* Query a single image task
+* Query all image tasks owned by the current user
+* Query a single image task owned by the current user
 * Cancel image tasks
 * Track task status
+* User-based task ownership
 
 Task status flow:
 
@@ -73,11 +97,12 @@ The project includes a simple API test automation module.
 It supports:
 
 * Create API test cases
-* Query API test cases
+* Query API test cases owned by the current user
 * Execute HTTP requests
 * Validate expected HTTP status code
 * Store test execution results
 * Query test run history
+* User-based test case ownership
 
 ---
 
@@ -99,6 +124,7 @@ After an image task is completed, the system stores a generated image file and r
 
 * C#
 * ASP.NET Core Web API
+* JWT Bearer Authentication
 * Entity Framework Core
 * SQLite
 * BackgroundService
@@ -116,6 +142,7 @@ After an image task is completed, the system stores a generated image file and r
 AiImageTaskManager
 ├── AiImageTaskManager.Api
 │   ├── Controllers
+│   ├── Services
 │   ├── Program.cs
 │   └── wwwroot/images/generated
 │
@@ -136,12 +163,21 @@ AiImageTaskManager
 └── AiImageTaskManager.IntegrationTests
     ├── ApiTestCases
     ├── Factories
+    ├── Helpers
     └── ImageTasks
 ```
 
 ---
 
 ## API Endpoints
+
+### Auth
+
+```http
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
+```
 
 ### Image Tasks
 
@@ -167,10 +203,66 @@ GET    /api/test-cases/{id}/runs
 
 ## Example Requests
 
+### Register
+
+```http
+POST /api/auth/register
+```
+
+```json
+{
+  "email": "test@example.com",
+  "displayName": "Test User",
+  "password": "P@ssw0rd123"
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+```
+
+```json
+{
+  "email": "test@example.com",
+  "password": "P@ssw0rd123"
+}
+```
+
+Example response:
+
+```json
+{
+  "userId": 1,
+  "email": "test@example.com",
+  "displayName": "Test User",
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+### Get Current User
+
+```http
+GET /api/auth/me
+Authorization: Bearer {token}
+```
+
+Example response:
+
+```json
+{
+  "userId": 1,
+  "email": "test@example.com",
+  "displayName": "Test User"
+}
+```
+
 ### Create Image Task
 
 ```http
 POST /api/image-tasks
+Authorization: Bearer {token}
 ```
 
 ```json
@@ -189,6 +281,7 @@ POST /api/image-tasks
 
 ```http
 GET /api/image-tasks/{id}/images
+Authorization: Bearer {token}
 ```
 
 Example response:
@@ -212,18 +305,48 @@ Example response:
 
 ```http
 POST /api/test-cases
+Authorization: Bearer {token}
 ```
 
 ```json
 {
-  "name": "Get all image tasks",
-  "method": "GET",
-  "url": "https://localhost:7074/api/image-tasks",
+  "name": "Login endpoint should return 200",
+  "method": "POST",
+  "url": "https://localhost:7074/api/auth/login",
   "headersJson": null,
-  "bodyJson": null,
+  "bodyJson": "{\"email\":\"test@example.com\",\"password\":\"P@ssw0rd123\"}",
   "expectedStatusCode": 200
 }
 ```
+
+---
+
+## HTTP Test File
+
+JWT-protected endpoints can be tested using the included `.http` file.
+
+Recommended base URL:
+
+```http
+@baseUrl = https://localhost:7074
+```
+
+Example:
+
+```http
+@baseUrl = https://localhost:7074
+@token = PASTE_JWT_TOKEN_HERE
+
+### Get current user
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Get image tasks
+GET {{baseUrl}}/api/image-tasks
+Authorization: Bearer {{token}}
+```
+
+> Note: Swagger UI may not consistently attach the Authorization header in the current .NET 10 / Swashbuckle setup. The `.http` file is recommended for testing JWT-protected endpoints.
 
 ---
 
@@ -232,9 +355,11 @@ POST /api/test-cases
 This project uses xUnit and `WebApplicationFactory` for integration testing.
 
 The test environment uses `InMemoryDatabase` to avoid affecting the local SQLite development database.
+Integration tests also register a test user and attach a JWT token to test protected endpoints.
 
 Current integration tests cover:
 
+* User authentication setup for tests
 * Create image task
 * Get image task list
 * Get image task by ID
@@ -311,6 +436,7 @@ https://localhost:7074/swagger
 ## Key Highlights
 
 * Layered architecture separating API, Application, Domain, and Infrastructure
+* JWT-based authentication and user-based data isolation
 * EF Core migration-based database management
 * BackgroundService-based asynchronous task processing
 * Generated image metadata and local static file storage
@@ -324,7 +450,7 @@ https://localhost:7074/swagger
 
 * Image generation currently uses a mock PNG file instead of a real AI generation model.
 * Stable Diffusion WebUI / ComfyUI integration is not implemented yet.
-* Authentication and user-based task ownership are not implemented yet.
+* Swagger UI authorization may not consistently attach the Authorization header in the current .NET 10 / Swashbuckle setup.
 * API test cases currently validate HTTP status code only.
 * Frontend dashboard is not implemented yet.
 
@@ -333,9 +459,10 @@ https://localhost:7074/swagger
 ## Future Work
 
 * Integrate Stable Diffusion WebUI API or ComfyUI API
-* Add JWT authentication and user-based task ownership
 * Add frontend dashboard
 * Support response body validation for API test cases
 * Support multi-step API test workflows
 * Replace SQLite with PostgreSQL or SQL Server
 * Add Docker Compose deployment environment
+* Add refresh token support
+* Add role-based authorization
