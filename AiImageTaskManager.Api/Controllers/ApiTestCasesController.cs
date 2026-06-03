@@ -1,10 +1,12 @@
 ﻿using AiImageTaskManager.Application.DTOs;
 using AiImageTaskManager.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AiImageTaskManager.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/test-cases")]
 public class ApiTestCasesController : ControllerBase
 {

@@ -7,19 +7,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AiImageTaskManager.Infrastructure.Services;
 
-
 public class ImageTaskService : IImageTaskService
 {
     private readonly AppDbContext _dbContext;
+    private readonly ICurrentUserService _currentUserService;
 
-    public ImageTaskService(AppDbContext dbContext)
+    public ImageTaskService(
+        AppDbContext dbContext,
+        ICurrentUserService currentUserService)
     {
         _dbContext = dbContext;
+        _currentUserService = currentUserService;
     }
 
     public async Task<List<ImageTaskResponse>> GetAllAsync()
     {
+        var userId = _currentUserService.UserId;
+
         var tasks = await _dbContext.ImageGenerationTasks
+            .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
@@ -28,8 +34,10 @@ public class ImageTaskService : IImageTaskService
 
     public async Task<ImageTaskResponse?> GetByIdAsync(int id)
     {
+        var userId = _currentUserService.UserId;
+
         var task = await _dbContext.ImageGenerationTasks
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         return task == null ? null : MapToResponse(task);
     }
@@ -41,8 +49,16 @@ public class ImageTaskService : IImageTaskService
             throw new ArgumentException("Prompt is required.");
         }
 
+        var userId = _currentUserService.UserId;
+
+        if (userId <= 0)
+        {
+            throw new UnauthorizedAccessException("User is not authenticated.");
+        }
+
         var task = new ImageGenerationTask
         {
+            UserId = userId,
             Prompt = request.Prompt,
             NegativePrompt = request.NegativePrompt,
             Width = request.Width,
@@ -62,8 +78,10 @@ public class ImageTaskService : IImageTaskService
 
     public async Task<bool> CancelAsync(int id)
     {
+        var userId = _currentUserService.UserId;
+
         var task = await _dbContext.ImageGenerationTasks
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (task == null)
         {
@@ -79,6 +97,30 @@ public class ImageTaskService : IImageTaskService
         await _dbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<List<GeneratedImageResponse>> GetImagesByTaskIdAsync(int taskId)
+    {
+        var userId = _currentUserService.UserId;
+
+        var images = await _dbContext.GeneratedImages
+            .Where(x => x.ImageGenerationTaskId == taskId &&
+                        x.ImageGenerationTask != null &&
+                        x.ImageGenerationTask.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+        return images.Select(x => new GeneratedImageResponse
+        {
+            Id = x.Id,
+            ImageGenerationTaskId = x.ImageGenerationTaskId,
+            ImagePath = x.ImagePath,
+            ThumbnailPath = x.ThumbnailPath,
+            FileSize = x.FileSize,
+            Width = x.Width,
+            Height = x.Height,
+            CreatedAt = x.CreatedAt
+        }).ToList();
     }
 
     private static ImageTaskResponse MapToResponse(ImageGenerationTask task)
@@ -99,25 +141,5 @@ public class ImageTaskService : IImageTaskService
             StartedAt = task.StartedAt,
             CompletedAt = task.CompletedAt
         };
-    }
-
-    public async Task<List<GeneratedImageResponse>> GetImagesByTaskIdAsync(int taskId)
-    {
-        var images = await _dbContext.GeneratedImages
-            .Where(x => x.ImageGenerationTaskId == taskId)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
-
-        return images.Select(x => new GeneratedImageResponse
-        {
-            Id = x.Id,
-            ImageGenerationTaskId = x.ImageGenerationTaskId,
-            ImagePath = x.ImagePath,
-            ThumbnailPath = x.ThumbnailPath,
-            FileSize = x.FileSize,
-            Width = x.Width,
-            Height = x.Height,
-            CreatedAt = x.CreatedAt
-        }).ToList();
     }
 }

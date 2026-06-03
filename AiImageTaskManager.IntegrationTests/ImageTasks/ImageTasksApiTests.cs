@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using AiImageTaskManager.IntegrationTests.Factories;
+using AiImageTaskManager.IntegrationTests.Helpers;
 
 namespace AiImageTaskManager.IntegrationTests.ImageTasks;
 
@@ -11,6 +12,7 @@ public class ImageTasksApiTests : IClassFixture<CustomWebApplicationFactory>
     public ImageTasksApiTests(CustomWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
+        AuthTestHelper.AuthenticateAsync(_client).GetAwaiter().GetResult();
     }
 
     [Fact]

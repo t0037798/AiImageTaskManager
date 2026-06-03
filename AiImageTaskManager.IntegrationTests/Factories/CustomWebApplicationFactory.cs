@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -14,6 +15,18 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Testing");
 
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            var testSettings = new Dictionary<string, string?>
+            {
+                ["Jwt:Issuer"] = "AiImageTaskManager",
+                ["Jwt:Audience"] = "AiImageTaskManagerClient",
+                ["Jwt:Key"] = "This is a development secret key for AiImageTaskManager JWT authentication. Change this in production."
+            };
+
+            config.AddInMemoryCollection(testSettings);
+        });
+
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<DbContextOptions<AppDbContext>>();
@@ -21,7 +34,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseInMemoryDatabase("AiImageTaskManagerTestDb");
+                options.UseInMemoryDatabase($"AiImageTaskManagerTestDb-{Guid.NewGuid()}");
             });
         });
     }
